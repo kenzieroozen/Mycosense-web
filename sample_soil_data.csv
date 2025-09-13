@@ -1,0 +1,11 @@
+x,y,voltage,pollutant
+10,20,0.45,Lead
+15,25,0.65,Copper
+20,30,0.72,Nickel
+25,35,0.80,PFAS
+30,40,0.35,None
+12,18,0.50,Lead
+18,22,0.68,Copper
+28,32,0.78,Nickel
+35,45,0.90,PFAS
+5,10,0.25,None
