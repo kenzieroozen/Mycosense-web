@@ -31,11 +31,13 @@ export const createHeatmap = async (data: SoilData[], containerId: string) => {
     return;
   }
 
+  // Use histogram2d for scattered point data instead of regular heatmap
   const trace = {
     x: data.map(d => d.x),
     y: data.map(d => d.y),
     z: data.map(d => d.voltage),
-    type: 'heatmap',
+    type: 'histogram2d',
+    histfunc: 'avg', // Aggregate voltage values by average, not count
     colorscale: [
       [0, '#10b981'], // Green (low contamination)
       [0.5, '#f59e0b'], // Yellow (medium contamination)
@@ -43,10 +45,12 @@ export const createHeatmap = async (data: SoilData[], containerId: string) => {
     ],
     showscale: true,
     colorbar: {
-      title: 'Voltage Level',
+      title: 'Avg Voltage Level',
       titlefont: { color: '#ffffff' },
       tickfont: { color: '#ffffff' }
-    }
+    },
+    nbinsx: 15,
+    nbinsy: 15
   };
 
   const layout = {
