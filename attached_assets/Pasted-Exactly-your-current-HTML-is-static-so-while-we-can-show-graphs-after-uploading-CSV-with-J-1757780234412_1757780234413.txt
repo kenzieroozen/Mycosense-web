@@ -1,0 +1,216 @@
+Exactly ✅ — your current HTML is **static**, so while we can show graphs after uploading CSV (with JS only), it cannot persist data, authenticate users, or run AI logic properly.
+
+👉 For a **dynamic, scalable version** we should use a frontend framework like **Vue.js** (or React/Next.js), with libraries for charts (`Plotly.js` / `Chart.js`) and CSV parsing (`PapaParse`).
+
+Here’s a **Vue.js 3 (Vite) overall app code** for your project:
+
+---
+
+### 1. Project Setup
+
+```bash
+# install vue with vite
+npm create vite@latest mycosense
+cd mycosense
+npm install
+npm install plotly.js papaparse
+npm run dev
+```
+
+---
+
+### 2. `index.html`
+
+Keep Tailwind + Plotly in:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MycoSense Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gradient-to-br from-black via-gray-900 to-green-900 text-white">
+    <div id="app"></div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
+```
+
+---
+
+### 3. `src/main.js`
+
+```js
+import { createApp } from 'vue'
+import App from './App.vue'
+createApp(App).mount('#app')
+```
+
+---
+
+### 4. `src/App.vue`
+
+This is the full dashboard in Vue:
+
+```vue
+<template>
+  <div class="min-h-screen">
+    <!-- Header -->
+    <header class="fixed top-0 left-0 w-full flex justify-between items-center p-6 bg-black bg-opacity-70 backdrop-blur-md z-50">
+      <h1 class="text-3xl font-extrabold text-green-400">🌱 MycoSense</h1>
+      <nav class="space-x-6 hidden md:flex">
+        <a href="#home" class="hover:text-green-400">Home</a>
+        <a href="#features" class="hover:text-green-400">Features</a>
+        <a href="#dashboard" class="hover:text-green-400">Dashboard</a>
+      </nav>
+    </header>
+
+    <!-- Hero -->
+    <section id="home" class="h-screen flex flex-col justify-center items-center text-center">
+      <h2 class="text-5xl font-extrabold text-green-300">Soil Safety Dashboard</h2>
+      <p class="mt-4 max-w-2xl text-lg opacity-80">Upload your soil biosensor data to analyze contamination risks.</p>
+    </section>
+
+    <!-- Features -->
+    <section id="features" class="py-16">
+      <div class="max-w-5xl mx-auto text-center">
+        <h3 class="text-4xl font-bold mb-10">Features</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="p-6 rounded-lg bg-black bg-opacity-50">
+            <i class="fas fa-microscope text-green-400 text-3xl mb-4"></i>
+            <h4 class="text-xl font-semibold">Real-Time Detection</h4>
+            <p class="opacity-80">Detect heavy metals instantly with biosensors.</p>
+          </div>
+          <div class="p-6 rounded-lg bg-black bg-opacity-50">
+            <i class="fas fa-seedling text-green-400 text-3xl mb-4"></i>
+            <h4 class="text-xl font-semibold">Sustainable</h4>
+            <p class="opacity-80">Eco-conscious design for soil health.</p>
+          </div>
+          <div class="p-6 rounded-lg bg-black bg-opacity-50">
+            <i class="fas fa-microchip text-green-400 text-3xl mb-4"></i>
+            <h4 class="text-xl font-semibold">IoT-Enabled</h4>
+            <p class="opacity-80">ESP32 integration for remote monitoring.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Dashboard -->
+    <section id="dashboard" class="py-16">
+      <h3 class="text-4xl font-bold text-center mb-8">📊 Dashboard</h3>
+      <div class="max-w-4xl mx-auto text-center">
+        <input type="file" @change="handleFileUpload" class="mb-6 text-white"/>
+        <p class="text-sm opacity-70">Upload a CSV with x,y,voltage,pollutant columns</p>
+      </div>
+
+      <div v-if="data.length > 0" class="mt-10">
+        <div id="heatmap" class="bg-black bg-opacity-50 p-4 rounded-xl mb-8"></div>
+        <div id="barChart" class="bg-black bg-opacity-50 p-4 rounded-xl mb-8"></div>
+        <div id="lineChart" class="bg-black bg-opacity-50 p-4 rounded-xl"></div>
+      </div>
+    </section>
+  </div>
+</template>
+
+<script>
+import Papa from "papaparse";
+import Plotly from "plotly.js-dist";
+
+export default {
+  data() {
+    return {
+      data: []
+    };
+  },
+  methods: {
+    handleFileUpload(event) {
+      const file = event.target.files[0];
+      if (file) {
+        Papa.parse(file, {
+          header: true,
+          dynamicTyping: true,
+          complete: (results) => {
+            this.data = results.data.filter(d => d.x && d.y && d.voltage);
+            this.drawCharts();
+          }
+        });
+      }
+    },
+    drawCharts() {
+      const data = this.data;
+
+      // Heatmap
+      Plotly.newPlot("heatmap", [{
+        x: data.map(d => d.x),
+        y: data.map(d => d.y),
+        z: data.map(d => d.voltage),
+        type: 'heatmap',
+        colorscale: 'RdYlGn'
+      }], { title: "Soil Contamination Heatmap" });
+
+      // Bar chart (pollutant distribution)
+      const pollutantCounts = {};
+      data.forEach(d => pollutantCounts[d.pollutant] = (pollutantCounts[d.pollutant] || 0) + 1);
+      Plotly.newPlot("barChart", [{
+        x: Object.keys(pollutantCounts),
+        y: Object.values(pollutantCounts),
+        type: 'bar',
+        marker: { color: 'green' }
+      }], { title: "Pollutant Distribution" });
+
+      // Line chart (voltage trend)
+      Plotly.newPlot("lineChart", [{
+        x: data.map((_, i) => i + 1),
+        y: data.map(d => d.voltage),
+        mode: 'lines+markers',
+        line: { color: 'lime' }
+      }], { title: "Voltage Trend" });
+    }
+  }
+}
+</script>
+
+<style>
+body {
+  font-family: 'Inter', sans-serif;
+}
+</style>
+```
+
+---
+
+### 5. Example CSV
+
+`soil_data.csv`
+
+```csv
+x,y,voltage,pollutant
+10,20,0.45,Lead
+15,25,0.65,Copper
+20,30,0.72,Nickel
+25,35,0.80,PFAS
+30,40,0.35,None
+12,18,0.50,Lead
+18,22,0.68,Copper
+28,32,0.78,Nickel
+35,45,0.90,PFAS
+```
+
+---
+
+### 🚀 Run it
+
+```bash
+npm run dev
+```
+
+Then open `http://localhost:5173` (default Vite port).
+
+---
+
+👉 With this, you’ll have your **full interactive dashboard in Vue.js** following the same dark Tailwind theme.
+
+Do you want me to also add a **login system (like your Streamlit one)** in Vue, where only “Joko” can access the dashboard?
