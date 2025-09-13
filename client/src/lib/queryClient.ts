@@ -12,11 +12,15 @@ export async function apiRequest(
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
+  // Handle FormData differently - don't set Content-Type or stringify
+  const isFormData = data instanceof FormData;
+  
   const res = await fetch(url, {
     method,
-    headers: data ? { "Content-Type": "application/json" } : {},
-    body: data ? JSON.stringify(data) : undefined,
+    headers: (!isFormData && data) ? { "Content-Type": "application/json" } : {},
+    body: isFormData ? data : (data ? JSON.stringify(data) : undefined),
     credentials: "include",
+    cache: "no-store", // Bypass HTTP cache for consistent behavior
   });
 
   await throwIfResNotOk(res);
@@ -31,6 +35,7 @@ export const getQueryFn: <T>(options: {
   async ({ queryKey }) => {
     const res = await fetch(queryKey.join("/") as string, {
       credentials: "include",
+      cache: "no-store", // Bypass HTTP cache to prevent 304 responses
     });
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {
