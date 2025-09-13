@@ -49,7 +49,7 @@ export default function AppFooter() {
         
         <div className="border-t border-border mt-12 pt-8 flex flex-col md:flex-row items-center justify-between">
           <p className="text-sm text-muted-foreground">
-            © 2024 MycoSense. All rights reserved.
+            © 2025 MycoSense. All rights reserved.
           </p>
           <div className="flex items-center space-x-6 mt-4 md:mt-0 text-sm text-muted-foreground">
             <a href="#" className="hover:text-primary transition-colors" data-testid="link-privacy">Privacy Policy</a>
