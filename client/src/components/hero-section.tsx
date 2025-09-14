@@ -54,7 +54,7 @@ export default function HeroSection() {
         <div className="mt-12 flex items-center justify-center space-x-8 text-muted-foreground">
           <div className="flex items-center space-x-2">
             <i className="fas fa-shield-alt text-primary"></i>
-            <span className="text-sm">99.7% Accuracy</span>
+            <span className="text-sm">Comprehensive AI Driven Analysis</span>
           </div>
           <div className="flex items-center space-x-2">
             <i className="fas fa-clock text-primary"></i>

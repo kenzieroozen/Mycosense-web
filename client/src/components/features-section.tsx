@@ -22,7 +22,7 @@ export default function FeaturesSection() {
       icon: "fas fa-chart-line",
       color: "accent",
       title: "AI Analytics",
-      description: "Machine learning algorithms analyze patterns and predict contamination trends with 99.7% accuracy.",
+      description: "Machine learning algorithms analyze patterns and predict contamination trends with comprehensive and deep data-driven accuracy.",
     },
     {
       icon: "fas fa-mobile-alt",
